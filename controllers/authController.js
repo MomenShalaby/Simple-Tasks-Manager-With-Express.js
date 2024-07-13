@@ -1,8 +1,3 @@
-const crypto = require("crypto");
-
-const secretKey = process.env.JWT_SECRET_KEY;
-const jwtExpire = process.env.JWT_EXPIRE_TIME;
-
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const asyncHandler = require("express-async-handler");
@@ -61,24 +56,41 @@ exports.protect = asyncHandler(async (req, res, next) => {
     );
   }
 
-  if (user.passwordChanged) {
-    const passwordChangedTime = parseInt(
-      user.passwordChanged.getTime() / 1000,
-      10
-    );
-    if (passwordChangedTime > decoded.iat) {
-      return next(
-        new ApiError(`Password was recently changed, please login again`, 401)
-      );
-    }
-  }
+  // if (user.passwordChanged) {
+  //   const passwordChangedTime = parseInt(
+  //     user.passwordChanged.getTime() / 1000,
+  //     10
+  //   );
+  //   if (passwordChangedTime > decoded.iat) {
+  //     return next(
+  //       new ApiError(`Password was recently changed, please login again`, 401)
+  //     );
+  //   }
+  // }
 
-  if (!user.active && !req.active) {
-    return next(
-      new ApiError(`You are not active, please reactivate your account.`, 401)
-    );
-  }
+  // if (!user.active && !req.active) {
+  //   return next(
+  //     new ApiError(`You are not active, please reactivate your account.`, 401)
+  //   );
+  // }
 
   req.user = user;
   next();
 });
+
+exports.isAuthorized = (model) =>
+  asyncHandler(async (req, res, next) => {
+    const user = req.user.id;
+    const document = await model.findById(req.params.id);
+    if (!document) {
+      return next(
+        new ApiError(`There is no document with this id ${req.params.id}`, 404)
+      );
+    }
+    if (document.user._id.toString() !== user.toString()) {
+      return next(
+        new ApiError(`This Document doesn't belong to this user.`, 404)
+      );
+    }
+    next();
+  });

@@ -7,11 +7,11 @@ const nameValidator = [
     .notEmpty()
     .trim()
     .withMessage("Name is empty")
-    .bail() // Add bail() here
+    .bail() 
 
     .isLength({ min: 2 })
     .withMessage("Name is too short")
-    .bail() // Add bail() here
+    .bail() 
 
     .isLength({ max: 20 })
     .withMessage("Name is too long")
@@ -32,11 +32,11 @@ const emailValidator = [
     .notEmpty()
     .trim()
     .withMessage("Email is empty")
-    .bail() // Add bail() here
+    .bail() 
 
     .isEmail()
     .withMessage("Invalid email format")
-    .bail(), // Add bail() here
+    .bail(), 
 ];
 
 const passwordValidator = [
@@ -44,11 +44,11 @@ const passwordValidator = [
     .notEmpty()
     .trim()
     .withMessage("Password is empty")
-    .bail() // Add bail() here
+    .bail() 
 
     .isLength({ min: 8 })
     .withMessage("Password is too short")
-    .bail() // Add bail() here
+    .bail() 
 
     .isLength({ max: 32 })
     .withMessage("Password is too long")
