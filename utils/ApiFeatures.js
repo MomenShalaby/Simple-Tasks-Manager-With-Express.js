@@ -4,7 +4,14 @@ class ApiFeatures {
     this.mongooseQuery = mongooseQuery;
   }
 
-  filter() {
+  populate(...args) {
+    args.forEach((arg) => {
+      this.mongooseQuery = this.mongooseQuery.populate(arg);
+    });
+    return this;
+  }
+
+  filter(nonAuthorized) {
     // eslint-disable-next-line node/no-unsupported-features/es-syntax
     const queryStringObject = { ...this.queryString };
     const excludeQueries = [
@@ -14,6 +21,7 @@ class ApiFeatures {
       "fields",
       "keyword",
       "deleted",
+      // "is_shared",
     ];
     excludeQueries.forEach((query) => delete queryStringObject[query]);
 
@@ -22,14 +30,22 @@ class ApiFeatures {
       /\b(gte|lte|gt|lt)\b/g,
       (match) => `$${match}`
     );
+
     this.mongooseQuery = this.mongooseQuery.find(JSON.parse(queryString));
+
+    if (this.queryString.is_shared && nonAuthorized) {
+      this.mongooseQuery = this.mongooseQuery.find({
+        is_shared: "true",
+      });
+    }
     return this;
   }
 
   sort() {
     if (this.queryString.sort) {
       const sortFields = this.queryString.sort.split(",").join(" ");
-      this.mongooseQuery = this.mongooseQuery.sort(sortFields); // Apply sorting criteria
+
+      this.mongooseQuery = this.mongooseQuery.sort(sortFields);
     } else {
       this.mongooseQuery = this.mongooseQuery.sort("-createdAt");
     }
